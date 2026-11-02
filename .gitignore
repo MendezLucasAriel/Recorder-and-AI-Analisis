@@ -1,0 +1,59 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment and secrets (CRITICAL)
+.env
+.env.*
+!.env.example
+*settings.json
+academic_settings.json
+work_settings.json
+
+# User recordings, transcriptions and session data
+sessions/*
+!sessions/.gitkeep
+academic_recorder/classes/*
+!academic_recorder/classes/.gitkeep
+work_recorder/meetings/*
+!work_recorder/meetings/.gitkeep
+*.wav
+*.mp3
+*.mp4
+*.mkv
+*.avi
+*.mov
+*.flac
+*.m4a
+
+# Compressed archives
+*.rar
+*.zip
+*.7z
+*.tar.gz
+*.tar
+
+# Heavy Whisper binary models (downloaded via descargar_modelo_gpu.bat)
+bin/vulkan/models/*
+!bin/vulkan/models/.gitkeep
+*.bin
+*.tmp
+
+# Temporary & test files
+scratch_slice.wav
+test_rec_mic_temp.wav
+test_term.mp4
+test_vulkan_out*
+*_vulkan_out*
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
