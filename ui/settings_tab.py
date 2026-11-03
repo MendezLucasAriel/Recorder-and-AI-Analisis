@@ -100,12 +100,13 @@ class SettingsTab(ctk.CTkFrame):
         grid_w = ctk.CTkFrame(card_whisper, fg_color="transparent")
         grid_w.pack(fill="x", padx=20, pady=10)
 
-        # Selector de Hardware: GPU AMD vs CPU
+        # Selector de Hardware: GPU vs CPU
         ctk.CTkLabel(grid_w, text="Dispositivo de Procesamiento:").grid(row=0, column=0, sticky="w", pady=5)
+        raw_gpu = DeviceDetector.get_gpu_name()
         self.device_combo = ctk.CTkComboBox(
             grid_w,
             values=[
-                "gpu (🎮 GPU AMD Radeon RX 470 — Vulkan Acelerado)",
+                f"gpu (🎮 GPU {raw_gpu} — Vulkan Acelerado)",
                 "cpu (💻 CPU Multinúcleo INT8 — Máxima Estabilidad)",
             ],
             width=420,

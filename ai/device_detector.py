@@ -1,7 +1,8 @@
 import os
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 
 @dataclass
@@ -18,8 +19,32 @@ class HardwareProfile:
 class DeviceDetector:
     """Detecta el hardware del sistema y determina la configuración óptima para Whisper."""
 
-    @staticmethod
-    def get_profile() -> HardwareProfile:
+    _cached_gpu_name: Optional[str] = None
+
+    @classmethod
+    def get_gpu_name(cls) -> str:
+        if cls._cached_gpu_name is not None:
+            return cls._cached_gpu_name
+
+        name = "GPU Dedicada"
+        try:
+            cmd = [
+                "powershell",
+                "-NoProfile",
+                "-Command",
+                "Get-CimInstance Win32_VideoController | Select-Object -ExpandProperty Name | Select-Object -First 1",
+            ]
+            detected = subprocess.check_output(cmd, text=True, timeout=2).strip()
+            if detected:
+                name = detected
+        except Exception:
+            pass
+
+        cls._cached_gpu_name = name
+        return name
+
+    @classmethod
+    def get_profile(cls) -> HardwareProfile:
         cpu_count = os.cpu_count() or 4
         whisper_threads = max(2, min(cpu_count - 2, 8))
 
@@ -28,7 +53,8 @@ class DeviceDetector:
         vulkan_cli = project_root / "bin" / "vulkan" / "whisper-cli.exe"
         has_vulkan = vulkan_cli.exists()
 
-        gpu_name = "AMD Radeon RX 470 (Aceleración Vulkan activa)" if has_vulkan else "No configurada"
+        raw_gpu = cls.get_gpu_name() if has_vulkan else "No configurada"
+        gpu_name = f"{raw_gpu} (Aceleración Vulkan activa)" if has_vulkan else "No configurada"
 
         return HardwareProfile(
             device="cpu",

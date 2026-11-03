@@ -115,10 +115,11 @@ class WorkSettingsTab(ctk.CTkFrame):
 
         # 1. Selector de Dispositivo (GPU vs CPU)
         ctk.CTkLabel(grid_w, text="Dispositivo de Procesamiento:").grid(row=0, column=0, sticky="w", pady=5)
+        raw_gpu = DeviceDetector.get_gpu_name()
         self.combo_device = ctk.CTkComboBox(
             grid_w,
             values=[
-                "gpu (🎮 GPU AMD Radeon RX 470 — Vulkan Acelerado)",
+                f"gpu (🎮 GPU {raw_gpu} — Vulkan Acelerado)",
                 "cpu (💻 CPU Multinúcleo INT8 — Máxima Estabilidad)",
             ],
             width=430,
@@ -310,9 +311,9 @@ class WorkSettingsTab(ctk.CTkFrame):
 
         backend = self.cfg.whisper_backend
         if backend == "gpu":
-            self.combo_device.set("gpu (🎮 GPU AMD Radeon RX 470 — Vulkan Acelerado)")
+            self.combo_device.set(self.combo_device.cget("values")[0])
         else:
-            self.combo_device.set("cpu (💻 CPU Multinúcleo INT8 — Máxima Estabilidad)")
+            self.combo_device.set(self.combo_device.cget("values")[1])
 
         w_model = self.cfg.whisper_model
         for val in self.combo_whisper_model.cget("values"):
