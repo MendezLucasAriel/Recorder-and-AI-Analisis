@@ -124,8 +124,11 @@ class VulkanTranscriber:
 
         model_path = self._ensure_model_downloaded(on_status)
 
+        from ai.device_detector import DeviceDetector
+        raw_gpu = DeviceDetector.get_gpu_name()
+
         if on_status:
-            on_status(f"Iniciando transcripción en GPU AMD RX 470 (Vulkan) con '{self.model_name}'...")
+            on_status(f"Iniciando transcripción en GPU {raw_gpu} (Vulkan) con '{self.model_name}'...")
 
         output_json_base = audio_path.with_name(f"{audio_path.stem}_vulkan_out")
         expected_json = Path(f"{output_json_base}.json")
@@ -138,15 +141,21 @@ class VulkanTranscriber:
             "-m", str(model_path),
             "-f", str(audio_path),
             "-l", lang_arg,
-            "-dev", "0",          # GPU 0: AMD Radeon RX 470
+            "-dev", "0",          # GPU 0
             "-oj",                # Salida JSON
             "-of", str(output_json_base),
             "-pp",                # Imprimir progreso en stderr
             "--flash-attn",       # Flash attention para acelerar en GPU
+            "-nf",                # Evitar bucles de alucinación por temperature fallback
         ]
 
         if self.initial_prompt and self.initial_prompt.strip():
-            cmd.extend(["--prompt", self.initial_prompt.strip()])
+            # Evitar condicionar audio en inglés con un prompt en español para prevenir bucles de alucinación
+            is_spanish_prompt = any(w in self.initial_prompt.lower() for w in ["reunión", "clase", "materia", "física", "matemáticas", "trabajo"])
+            if lang_arg == "en" and is_spanish_prompt:
+                pass
+            else:
+                cmd.extend(["--prompt", self.initial_prompt.strip()])
 
         start_time = time.time()
         process = subprocess.Popen(

@@ -10,6 +10,12 @@ WHISPER_WORK_INITIAL_PROMPT = (
     "responsables, fechas límite, feedback, producción, despliegue, arquitectura."
 )
 
+WHISPER_WORK_INITIAL_PROMPT_EN = (
+    "Corporate business meeting, video conference, team sync, daily standup, sprint planning, "
+    "project management, engineering, product, deliverables, goals, metrics, deadlines, "
+    "action items, decisions, roadmap, backlog, deployment, release, architecture."
+)
+
 WORK_SYSTEM_INSTRUCTION = """
 Eres un asistente ejecutivo y secretario de actas corporativas de alto nivel.
 Tu tarea es analizar la transcripción de una reunión de trabajo o llamada profesional (con marcas de tiempo [MM:SS]) y generar una minuta ejecutiva clara, accionable y estructurada.

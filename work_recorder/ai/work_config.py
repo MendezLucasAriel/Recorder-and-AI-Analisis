@@ -4,7 +4,7 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Optional
 
-from .work_prompts import WHISPER_WORK_INITIAL_PROMPT
+from .work_prompts import WHISPER_WORK_INITIAL_PROMPT, WHISPER_WORK_INITIAL_PROMPT_EN
 
 
 @dataclass
@@ -68,4 +68,6 @@ class WorkConfig:
     def get_effective_initial_prompt(self) -> str:
         if self.custom_initial_prompt and self.custom_initial_prompt.strip():
             return self.custom_initial_prompt.strip()
+        if self.language == "en":
+            return WHISPER_WORK_INITIAL_PROMPT_EN
         return WHISPER_WORK_INITIAL_PROMPT
