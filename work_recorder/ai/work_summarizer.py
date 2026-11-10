@@ -16,10 +16,18 @@ class WorkSummarizer:
     Genera minutas ejecutivas, tareas y síntesis de reuniones con Gemini 3.8 Flash.
     """
 
-    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        model: Optional[str] = None,
+        model_name: Optional[str] = None,
+        **kwargs,
+    ):
         cfg = WorkConfig.load()
         self.api_key = api_key or cfg.gemini_api_key or os.environ.get("GEMINI_API_KEY", "")
-        self.model = model or cfg.gemini_model or "gemini-3.8-flash"
+        chosen_model = model_name or model or cfg.gemini_model or "gemini-3.8-flash"
+        self.model = chosen_model
+        self.model_name = chosen_model
 
     def summarize(
         self,
