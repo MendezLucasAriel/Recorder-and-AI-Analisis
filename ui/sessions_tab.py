@@ -482,8 +482,9 @@ class SessionsTab(ctk.CTkFrame):
                 self._update_status("Transcripción existente encontrada. Cargando...", 0.6)
                 transcript = session.load_transcript()
 
-            # 2. Resumen con Gemini
-            self._update_status("Conectando con Gemini para generar la crónica D&D...", 0.75)
+            # 2. Resumen con IA (Gemini o LM Studio)
+            prov_label = f"LM Studio ({cfg.local_model_name})" if getattr(cfg, "ai_provider", "gemini") == "local" else f"Gemini ({cfg.gemini_model})"
+            self._update_status(f"Generando crónica D&D con {prov_label}...", 0.75)
             summarizer = Summarizer(api_key=cfg.gemini_api_key)
             summary = summarizer.summarize(
                 transcript=transcript,
@@ -550,7 +551,8 @@ class SessionsTab(ctk.CTkFrame):
             if not transcript:
                 raise ValueError("No hay transcripción disponible para resumir. Transcribe primero.")
 
-            self._update_status("Generando resumen con Gemini...", 0.3)
+            prov_label = f"LM Studio ({cfg.local_model_name})" if getattr(cfg, "ai_provider", "gemini") == "local" else f"Gemini ({cfg.gemini_model})"
+            self._update_status(f"Generando resumen con {prov_label}...", 0.3)
             summarizer = Summarizer(api_key=cfg.gemini_api_key)
             summary = summarizer.summarize(
                 transcript=transcript,

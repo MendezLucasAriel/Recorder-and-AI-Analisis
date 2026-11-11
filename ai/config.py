@@ -13,8 +13,11 @@ else:
 @dataclass
 class AIConfig:
     gemini_api_key: str = ""
-    gemini_model: str = "gemini-3.5-flash"
-    whisper_backend: str = "cpu"       # "cpu" o "gpu" (AMD RX 470)
+    gemini_model: str = "gemini-3.8-flash"
+    ai_provider: str = "gemini"  # "gemini" o "local" (LM Studio / Ollama)
+    local_api_base: str = "http://localhost:1234/v1"
+    local_model_name: str = "google/gemma-4-12b-qat"
+    whisper_backend: str = "cpu"       # "cpu" o "gpu"
     whisper_model: str = "small"
     whisper_device: str = "auto"
     whisper_compute_type: str = "auto"
@@ -25,7 +28,10 @@ class AIConfig:
     def load(cls) -> "AIConfig":
         return cls(
             gemini_api_key=os.environ.get("GEMINI_API_KEY", "").strip(),
-            gemini_model=os.environ.get("GEMINI_MODEL", "gemini-3.5-flash").strip(),
+            gemini_model=os.environ.get("GEMINI_MODEL", "gemini-3.8-flash").strip(),
+            ai_provider=os.environ.get("AI_PROVIDER", "gemini").strip(),
+            local_api_base=os.environ.get("LOCAL_API_BASE", "http://localhost:1234/v1").strip(),
+            local_model_name=os.environ.get("LOCAL_MODEL_NAME", "google/gemma-4-12b-qat").strip(),
             whisper_backend=os.environ.get("WHISPER_BACKEND", "cpu").strip().lower(),
             whisper_model=os.environ.get("WHISPER_MODEL", "small").strip(),
             whisper_device=os.environ.get("WHISPER_DEVICE", "auto").strip(),
@@ -38,6 +44,9 @@ class AIConfig:
         lines = [
             f"GEMINI_API_KEY={self.gemini_api_key}",
             f"GEMINI_MODEL={self.gemini_model}",
+            f"AI_PROVIDER={self.ai_provider}",
+            f"LOCAL_API_BASE={self.local_api_base}",
+            f"LOCAL_MODEL_NAME={self.local_model_name}",
             f"WHISPER_BACKEND={self.whisper_backend}",
             f"WHISPER_MODEL={self.whisper_model}",
             f"WHISPER_DEVICE={self.whisper_device}",

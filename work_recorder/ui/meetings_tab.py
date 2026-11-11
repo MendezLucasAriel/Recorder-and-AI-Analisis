@@ -248,7 +248,7 @@ class MeetingsTab(ctk.CTkFrame):
 
         self.btn_summarize_only = ctk.CTkButton(
             action_bar,
-            text="🤖 Generar Minuta (Gemini)",
+            text="🤖 Generar Minuta (IA)",
             height=34,
             command=self._on_summarize_clicked,
             state="disabled",
@@ -799,9 +799,16 @@ class MeetingsTab(ctk.CTkFrame):
                 self._update_status("Transcripción existente encontrada. Cargando...", 0.6)
                 transcript = session.load_transcript()
 
-            # 2. Resumen y Minuta con Gemini
-            self._update_status(f"Generando minuta ejecutiva y tareas con {cfg.gemini_model}...", 0.76)
-            summarizer = WorkSummarizer(api_key=cfg.gemini_api_key, model_name=cfg.gemini_model)
+            # 2. Resumen y Minuta con IA (Gemini o LM Studio)
+            prov_label = f"LM Studio ({cfg.local_model_name})" if cfg.ai_provider == "local" else f"Gemini ({cfg.gemini_model})"
+            self._update_status(f"Generando minuta ejecutiva y tareas con {prov_label}...", 0.76)
+            summarizer = WorkSummarizer(
+                api_key=cfg.gemini_api_key,
+                model_name=cfg.gemini_model,
+                ai_provider=cfg.ai_provider,
+                local_api_base=cfg.local_api_base,
+                local_model_name=cfg.local_model_name,
+            )
             summary = summarizer.summarize(
                 transcript=transcript,
                 meeting_name=session.metadata.meeting_name,
@@ -873,8 +880,15 @@ class MeetingsTab(ctk.CTkFrame):
                 raise FileNotFoundError("No hay archivo transcript.json para esta reunión. Transcríbela primero.")
 
             transcript = session.load_transcript()
-            self._update_status(f"Generando minuta ejecutiva con {cfg.gemini_model}...", 0.2)
-            summarizer = WorkSummarizer(api_key=cfg.gemini_api_key, model_name=cfg.gemini_model)
+            prov_label = f"LM Studio ({cfg.local_model_name})" if cfg.ai_provider == "local" else f"Gemini ({cfg.gemini_model})"
+            self._update_status(f"Generando minuta ejecutiva con {prov_label}...", 0.2)
+            summarizer = WorkSummarizer(
+                api_key=cfg.gemini_api_key,
+                model_name=cfg.gemini_model,
+                ai_provider=cfg.ai_provider,
+                local_api_base=cfg.local_api_base,
+                local_model_name=cfg.local_model_name,
+            )
             summary = summarizer.summarize(
                 transcript=transcript,
                 meeting_name=session.metadata.meeting_name,

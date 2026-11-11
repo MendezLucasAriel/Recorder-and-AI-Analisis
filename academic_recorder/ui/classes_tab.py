@@ -575,8 +575,9 @@ class ClassesTab(ctk.CTkFrame):
                 self._update_status("Transcripción existente encontrada. Cargando...", 0.6)
                 transcript = session.load_transcript()
 
-            # 2. Resumen y apuntes con Gemini
-            self._update_status("Estructurando fórmulas en LaTeX, marcas de tiempo y glosario...", 0.76)
+            # 2. Resumen y apuntes con IA (Gemini o LM Studio)
+            prov_label = f"LM Studio ({cfg.local_model_name})" if getattr(cfg, "ai_provider", "gemini") == "local" else f"Gemini ({cfg.gemini_model})"
+            self._update_status(f"Estructurando fórmulas en LaTeX, marcas de tiempo y glosario con {prov_label}...", 0.76)
             summarizer = StemSummarizer(api_key=cfg.gemini_api_key)
             summary = summarizer.summarize(
                 transcript=transcript,
@@ -645,7 +646,8 @@ class ClassesTab(ctk.CTkFrame):
             if not transcript:
                 raise ValueError("No hay transcripción disponible. Transcribe primero.")
 
-            self._update_status("Estructurando fórmulas en LaTeX y glosario con Gemini...", 0.3)
+            prov_label = f"LM Studio ({cfg.local_model_name})" if getattr(cfg, "ai_provider", "gemini") == "local" else f"Gemini ({cfg.gemini_model})"
+            self._update_status(f"Estructurando fórmulas en LaTeX y glosario con {prov_label}...", 0.3)
             summarizer = StemSummarizer(api_key=cfg.gemini_api_key)
             summary = summarizer.summarize(
                 transcript=transcript,

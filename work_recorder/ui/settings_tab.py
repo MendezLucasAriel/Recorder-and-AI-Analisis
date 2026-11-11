@@ -1,3 +1,4 @@
+import json
 import webbrowser
 import customtkinter as ctk
 
@@ -37,28 +38,48 @@ class WorkSettingsTab(ctk.CTkFrame):
         subtitle.pack(pady=(0, 15), anchor="w", padx=20)
 
         # =========================================================================
-        # 1. SECCIÓN GEMINI API
+        # 1. SECCIÓN MOTOR DE INTELIGENCIA ARTIFICIAL (GEMINI / LM STUDIO LOCAL)
         # =========================================================================
-        sec_gemini = ctk.CTkFrame(scroll, fg_color=("#333333", "#252525"), corner_radius=8)
-        sec_gemini.pack(fill="x", padx=20, pady=8)
+        sec_ai = ctk.CTkFrame(scroll, fg_color=("#333333", "#252525"), corner_radius=8)
+        sec_ai.pack(fill="x", padx=20, pady=8)
 
         ctk.CTkLabel(
-            sec_gemini, text="🤖 Google Gemini AI (Minutas Ejecutivas y Tareas)", font=ctk.CTkFont(size=15, weight="bold")
+            sec_ai, text="🤖 Motor de IA para Minutas y Resúmenes", font=ctk.CTkFont(size=15, weight="bold")
         ).pack(anchor="w", padx=15, pady=(12, 4))
 
         ctk.CTkLabel(
-            sec_gemini,
-            text="Gemini analiza la transcripción de la llamada, extrae compromisos (Action Items) con responsables y plazos, y resume acuerdos clave.",
+            sec_ai,
+            text="Elige entre Google Gemini (procesamiento en la nube) o LM Studio / Localhost (100% privado en tu hardware local).",
             font=ctk.CTkFont(size=11),
             text_color="#95a5a6",
-        ).pack(anchor="w", padx=15, pady=(0, 8))
+        ).pack(anchor="w", padx=15, pady=(0, 10))
 
-        # API Key row
-        key_row = ctk.CTkFrame(sec_gemini, fg_color="transparent")
-        key_row.pack(fill="x", padx=15, pady=(0, 10))
+        # Fila Proveedor de IA
+        prov_row = ctk.CTkFrame(sec_ai, fg_color="transparent")
+        prov_row.pack(fill="x", padx=15, pady=(0, 12))
 
+        ctk.CTkLabel(prov_row, text="Proveedor de IA:", font=ctk.CTkFont(weight="bold")).pack(side="left", padx=(0, 10))
+        self.combo_ai_provider = ctk.CTkComboBox(
+            prov_row,
+            values=[
+                "gemini (Google Gemini — Nube)",
+                "local (LM Studio / Localhost — 100% Local)",
+            ],
+            command=self._on_provider_change,
+            width=380,
+        )
+        self.combo_ai_provider.pack(side="left")
+
+        # --- Contenedor Gemini ---
+        self.frame_gemini = ctk.CTkFrame(sec_ai, fg_color="transparent")
+        self.frame_gemini.pack(fill="x", padx=15, pady=(0, 10))
+
+        key_row = ctk.CTkFrame(self.frame_gemini, fg_color="transparent")
+        key_row.pack(fill="x", pady=(0, 8))
+
+        ctk.CTkLabel(key_row, text="Gemini API Key:").pack(side="left", padx=(0, 10))
         self.entry_api_key = ctk.CTkEntry(
-            key_row, placeholder_text="Pega tu clave AIzaSy...", width=400, show="*"
+            key_row, placeholder_text="Pega tu clave AIzaSy...", width=320, show="*"
         )
         self.entry_api_key.pack(side="left", padx=(0, 8))
 
@@ -69,18 +90,17 @@ class WorkSettingsTab(ctk.CTkFrame):
 
         btn_get_key = ctk.CTkButton(
             key_row,
-            text="🌐 Obtener API Key Gratis",
+            text="🌐 Obtener API Key",
             fg_color="#2980b9",
             hover_color="#3498db",
             command=lambda: webbrowser.open("https://aistudio.google.com/app/apikey"),
         )
         btn_get_key.pack(side="left")
 
-        # Modelo Gemini row
-        model_row = ctk.CTkFrame(sec_gemini, fg_color="transparent")
-        model_row.pack(fill="x", padx=15, pady=(0, 14))
+        model_row = ctk.CTkFrame(self.frame_gemini, fg_color="transparent")
+        model_row.pack(fill="x", pady=(0, 5))
 
-        ctk.CTkLabel(model_row, text="Modelo de IA:").pack(side="left", padx=(0, 10))
+        ctk.CTkLabel(model_row, text="Modelo Gemini:").pack(side="left", padx=(0, 10))
         self.combo_gemini_model = ctk.CTkComboBox(
             model_row,
             values=[
@@ -91,6 +111,48 @@ class WorkSettingsTab(ctk.CTkFrame):
             width=380,
         )
         self.combo_gemini_model.pack(side="left")
+
+        # --- Contenedor LM Studio / Local ---
+        self.frame_local = ctk.CTkFrame(sec_ai, fg_color="transparent")
+
+        local_url_row = ctk.CTkFrame(self.frame_local, fg_color="transparent")
+        local_url_row.pack(fill="x", pady=(0, 8))
+
+        ctk.CTkLabel(local_url_row, text="URL Servidor:").pack(side="left", padx=(0, 10))
+        self.entry_local_url = ctk.CTkEntry(
+            local_url_row, placeholder_text="http://localhost:1234/v1", width=280
+        )
+        self.entry_local_url.pack(side="left", padx=(0, 8))
+
+        self.btn_detect_local = ctk.CTkButton(
+            local_url_row,
+            text="🔄 Detectar Modelos",
+            fg_color="#16a085",
+            hover_color="#1abc9c",
+            command=self._detect_local_models,
+        )
+        self.btn_detect_local.pack(side="left")
+
+        local_model_row = ctk.CTkFrame(self.frame_local, fg_color="transparent")
+        local_model_row.pack(fill="x", pady=(0, 5))
+
+        ctk.CTkLabel(local_model_row, text="Modelo Local:").pack(side="left", padx=(0, 10))
+        self.combo_local_model = ctk.CTkComboBox(
+            local_model_row,
+            values=[
+                "google/gemma-4-12b-qat",
+                "meta-llama-3.1-8b-instruct-abliterated",
+                "qwen2.5-7b-instruct",
+                "qwen/qwen2.5-coder-14b",
+            ],
+            width=380,
+        )
+        self.combo_local_model.pack(side="left")
+
+        self.lbl_local_status = ctk.CTkLabel(
+            self.frame_local, text="", font=ctk.CTkFont(size=11), text_color="#bdc3c7"
+        )
+        self.lbl_local_status.pack(anchor="w", pady=(2, 5))
 
         # =========================================================================
         # 2. SECCIÓN MOTOR DE TRANSCRIPCIÓN LOCAL (WHISPER: GPU / CPU Y MODELO)
@@ -286,6 +348,48 @@ class WorkSettingsTab(ctk.CTkFrame):
             self.entry_api_key.configure(show="*")
             self.btn_toggle_key.configure(text="👁️")
 
+    def _on_provider_change(self, choice=None):
+        val = self.combo_ai_provider.get()
+        if val.startswith("local"):
+            self.frame_gemini.pack_forget()
+            self.frame_local.pack(fill="x", padx=15, pady=(0, 10))
+        else:
+            self.frame_local.pack_forget()
+            self.frame_gemini.pack(fill="x", padx=15, pady=(0, 10))
+
+    def _detect_local_models(self):
+        url = self.entry_local_url.get().strip().rstrip("/")
+        if not url.endswith("/v1"):
+            url = f"{url}/v1"
+        models_url = f"{url}/models"
+        self.lbl_local_status.configure(text="Conectando con LM Studio...", text_color="#f1c40f")
+        self.update_idletasks()
+        try:
+            import urllib.request
+            req = urllib.request.Request(models_url)
+            with urllib.request.urlopen(req, timeout=3) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                models = [m.get("id") for m in data.get("data", []) if m.get("id")]
+                if models:
+                    self.combo_local_model.configure(values=models)
+                    curr = self.combo_local_model.get()
+                    if curr not in models:
+                        self.combo_local_model.set(models[0])
+                    self.lbl_local_status.configure(
+                        text=f"✅ Conectado exitosamente. Se detectaron {len(models)} modelo(s).",
+                        text_color="#2ecc71",
+                    )
+                else:
+                    self.lbl_local_status.configure(
+                        text="⚠️ Servidor conectado, pero no se encontraron modelos descargados.",
+                        text_color="#e67e22",
+                    )
+        except Exception as e:
+            self.lbl_local_status.configure(
+                text=f"❌ No se pudo conectar a {models_url}. Verifica que LM Studio tenga el Local Server ON.",
+                text_color="#e74c3c",
+            )
+
     def _reset_prompt_to_default(self):
         self.txt_prompt.delete("1.0", "end")
         self.txt_prompt.insert("1.0", WHISPER_WORK_INITIAL_PROMPT)
@@ -299,6 +403,21 @@ class WorkSettingsTab(ctk.CTkFrame):
             os.startfile(str(bat_path))
 
     def _load_values(self):
+        # AI Provider
+        prov = getattr(self.cfg, "ai_provider", "gemini") or "gemini"
+        if prov == "local":
+            self.combo_ai_provider.set("local (LM Studio / Localhost — 100% Local)")
+        else:
+            self.combo_ai_provider.set("gemini (Google Gemini — Nube)")
+        self._on_provider_change()
+
+        local_url = getattr(self.cfg, "local_api_base", "http://localhost:1234/v1") or "http://localhost:1234/v1"
+        self.entry_local_url.delete(0, "end")
+        self.entry_local_url.insert(0, local_url)
+
+        local_mod = getattr(self.cfg, "local_model_name", "google/gemma-4-12b-qat") or "google/gemma-4-12b-qat"
+        self.combo_local_model.set(local_mod)
+
         if self.cfg.gemini_api_key:
             self.entry_api_key.delete(0, "end")
             self.entry_api_key.insert(0, self.cfg.gemini_api_key)
@@ -341,6 +460,11 @@ class WorkSettingsTab(ctk.CTkFrame):
         self.txt_prompt.insert("1.0", prompt)
 
     def _save_settings(self):
+        prov_raw = self.combo_ai_provider.get()
+        self.cfg.ai_provider = "local" if prov_raw.startswith("local") else "gemini"
+        self.cfg.local_api_base = self.entry_local_url.get().strip() or "http://localhost:1234/v1"
+        self.cfg.local_model_name = self.combo_local_model.get().strip() or "google/gemma-4-12b-qat"
+
         self.cfg.gemini_api_key = self.entry_api_key.get().strip()
 
         model_raw = self.combo_gemini_model.get()

@@ -11,6 +11,9 @@ from .work_prompts import WHISPER_WORK_INITIAL_PROMPT, WHISPER_WORK_INITIAL_PROM
 class WorkConfig:
     gemini_api_key: str = ""
     gemini_model: str = "gemini-3.8-flash"
+    ai_provider: str = "gemini"  # "gemini" o "local" (LM Studio / Ollama)
+    local_api_base: str = "http://localhost:1234/v1"
+    local_model_name: str = "google/gemma-4-12b-qat"
     meeting_type_default: str = "Reunión de Equipo / Sync"
     whisper_model: str = "medium"
     whisper_backend: str = "gpu"  # "gpu" (Vulkan) o "cpu" (INT8)
